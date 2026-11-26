@@ -21,8 +21,8 @@ A living notebook of my machine learning journey. Each topic gets its own folder
 
 | Status | Topic | Folder |
 |:------:|-------|--------|
-| ✅ | Simple Linear Regression | [`Linear Regression/`](Linear%20Regression) |
-| 🚧 | Multiple Linear Regression | *coming soon* |
+| ✅ | Simple Linear Regression | [`Simple Linear Regression/`](Simple%20Linear%20Regression) |
+| ✅ | Multiple Linear Regression | [`Multiple Linear Regression/`](Multiple%20Linear%20Regression) |
 | ⏳ | Polynomial Regression & Regularization (Ridge / Lasso) | — |
 | ⏳ | Logistic Regression | — |
 | ⏳ | Decision Trees & Random Forests | — |
@@ -41,9 +41,12 @@ Legend: ✅ done · 🚧 in progress · ⏳ planned
 
 ```
 Machine Learning/
-├── Linear Regression/
-│   ├── Simple_Linear_Regression.ipynb   # Notebook: EDA, model, evaluation
-│   └── height-weight.csv                # Dataset: weight (kg) vs height (cm)
+├── Simple Linear Regression/
+│   ├── Simple_Linear_Regression.ipynb     # Notebook: EDA, model, evaluation
+│   └── height-weight.csv                  # Dataset: weight (kg) vs height (cm)
+├── Multiple Linear Regression/
+│   ├── Multiple_Linear_Regression.ipynb   # Notebook: EDA, model, cross-validation, residuals
+│   └── economic_index.csv                 # Dataset: interest & unemployment rate vs index price
 └── README.md
 ```
 
@@ -62,6 +65,20 @@ Predicting **height from weight** with a single-feature linear model.
 - Cross-checking coefficients and statistics using `statsmodels` (OLS summary)
 
 **Key idea:** fit a line `y = β₀ + β₁x` that minimizes the sum of squared errors between predictions and actual values.
+
+## 📊 Featured: Multiple Linear Regression
+
+Predicting a **stock market index price** from **interest rate** and **unemployment rate**.
+
+**What the notebook covers**
+- Exploring feature relationships with `seaborn` (pairplot, heatmap, regplot)
+- Train/test split and feature scaling with `StandardScaler`
+- Training a multi-feature `LinearRegression` model
+- Validating with **cross-validation** (`cross_val_score`, negative MSE)
+- Evaluating with **MAE**, **MSE**, **RMSE** and **R²**
+- Analysing **residuals** with a KDE plot to check model assumptions
+
+**Key idea:** extend the line to several features, `y = β₀ + β₁x₁ + β₂x₂ + …`, where each coefficient shows a feature's effect with the others held constant.
 
 ## 🛠️ Tech Stack
 
