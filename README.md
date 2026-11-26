@@ -23,7 +23,8 @@ A living notebook of my machine learning journey. Each topic gets its own folder
 |:------:|-------|--------|
 | ✅ | Simple Linear Regression | [`Simple Linear Regression/`](Simple%20Linear%20Regression) |
 | ✅ | Multiple Linear Regression | [`Multiple Linear Regression/`](Multiple%20Linear%20Regression) |
-| ⏳ | Polynomial Regression & Regularization (Ridge / Lasso) | — |
+| ✅ | Polynomial Regression | [`Polynomial Regression/`](Polynomial%20Regression) |
+| 🚧 | Regularization (Ridge / Lasso / ElasticNet) | *up next* |
 | ⏳ | Logistic Regression | — |
 | ⏳ | Decision Trees & Random Forests | — |
 | ⏳ | k-Nearest Neighbors | — |
@@ -42,43 +43,93 @@ Legend: ✅ done · 🚧 in progress · ⏳ planned
 ```
 Machine Learning/
 ├── Simple Linear Regression/
-│   ├── Simple_Linear_Regression.ipynb     # Notebook: EDA, model, evaluation
-│   └── height-weight.csv                  # Dataset: weight (kg) vs height (cm)
+│   ├── Simple_Linear_Regression.ipynb     # Height from weight: EDA, model, metrics, OLS
+│   └── height-weight.csv                  # Dataset: 23 rows, Weight & Height
 ├── Multiple Linear Regression/
-│   ├── Multiple_Linear_Regression.ipynb   # Notebook: EDA, model, cross-validation, residuals
-│   └── economic_index.csv                 # Dataset: interest & unemployment rate vs index price
+│   ├── Multiple_Linear_Regression.ipynb   # Index price: CV, metrics, residual analysis, OLS
+│   └── economic_index.csv                 # Dataset: 24 rows, interest & unemployment rate
+├── Polynomial Regression/
+│   └── Polynomial_Regression.ipynb        # Synthetic quadratic data, degrees 1-6, Pipeline
 └── README.md
 ```
 
-Each new topic follows the same layout: a folder containing a notebook and the dataset(s) it uses.
+Each topic lives in its own folder with a notebook and the dataset(s) it uses (Polynomial Regression generates its own data, so it has no CSV).
 
-## 📈 Featured: Simple Linear Regression
+> **Note:** the notebooks were written in Google Colab and read their CSVs from `/content/`. When running locally, change the path to the CSV in the same folder, e.g. `pd.read_csv("height-weight.csv")`.
+
+## 📈 Simple Linear Regression
 
 Predicting **height from weight** with a single-feature linear model.
 
 **What the notebook covers**
-- Loading and exploring data with `pandas`
-- Visualizing relationships with `matplotlib` and `seaborn` (scatter plots, correlation)
-- Scaling features with `StandardScaler`
-- Training a model with `scikit-learn`'s `LinearRegression`
-- Evaluating with **MAE**, **MSE**, **RMSE**, and **R²**
-- Cross-checking coefficients and statistics using `statsmodels` (OLS summary)
+- Loading the data with `pandas`, then a scatter plot, correlation matrix, heatmap and pairplot
+- Why `X` must be 2-D (a DataFrame) while `y` can be 1-D
+- 75/25 train/test split, then `StandardScaler` fitted on the training set only
+- `LinearRegression` fit, with slope and intercept read from `coef_` and `intercept_`
+- Plotting the best-fit line over the training data
+- Metrics: **MSE, MAE, RMSE, R²** and a hand-computed **adjusted R²**
+- A `statsmodels` OLS summary and a prediction for a new weight
+
+**Results**
+
+| Metric | Value |
+|---|---|
+| Correlation (Weight vs Height) | 0.93 |
+| R² (test) | 0.74 |
+| Adjusted R² (test) | 0.67 |
+| MAE / RMSE (test) | 9.67 / 10.72 |
 
 **Key idea:** fit a line `y = β₀ + β₁x` that minimizes the sum of squared errors between predictions and actual values.
 
-## 📊 Featured: Multiple Linear Regression
+## 📊 Multiple Linear Regression
 
-Predicting a **stock market index price** from **interest rate** and **unemployment rate**.
+Predicting an **index price** from **interest rate** and **unemployment rate**.
 
 **What the notebook covers**
-- Exploring feature relationships with `seaborn` (pairplot, heatmap, regplot)
-- Train/test split and feature scaling with `StandardScaler`
-- Training a multi-feature `LinearRegression` model
-- Validating with **cross-validation** (`cross_val_score`, negative MSE)
-- Evaluating with **MAE**, **MSE**, **RMSE** and **R²**
-- Analysing **residuals** with a KDE plot to check model assumptions
+- Cleaning: dropping the unused `Unnamed: 0`, `year` and `month` columns and checking for nulls
+- EDA: pairplot, correlation matrix, heatmap, scatter and `regplot`
+- 75/25 split and `StandardScaler`
+- Training a two-feature `LinearRegression`
+- **3-fold cross-validation** with `cross_val_score` (negative MSE)
+- Metrics: **MSE, MAE, RMSE, R²** and **adjusted R²**
+- **Checking assumptions:** actual vs predicted plot, residuals with a KDE plot, and residuals vs predictions
+- A `statsmodels` OLS summary
 
-**Key idea:** extend the line to several features, `y = β₀ + β₁x₁ + β₂x₂ + …`, where each coefficient shows a feature's effect with the others held constant.
+**Results**
+
+| Metric | Value |
+|---|---|
+| Mean CV score (neg. MSE) | -5914.8 |
+| R² (test) | 0.83 |
+| Adjusted R² (test) | 0.71 |
+| MAE / RMSE (test) | 59.94 / 76.12 |
+| Coefficients (scaled features) | interest rate +88.3, unemployment rate -116.3 |
+
+**Key idea:** extend the line to several features, `y = β₀ + β₁x₁ + β₂x₂ + …`, where each coefficient shows a feature's effect with the others held constant. The two inputs are strongly correlated with each other (-0.93), a **multicollinearity** warning sign.
+
+With only 24 rows, the test set has just 6 points, so these scores are noisy.
+
+## 🌀 Polynomial Regression
+
+Fitting **curved data** with a linear model by adding polynomial features.
+
+**What the notebook covers**
+- Generating 100 synthetic points from `y = 0.5x² + 1.5x + 2 + noise`
+- Fitting a plain straight line first as the baseline
+- Using `PolynomialFeatures` (degree 2 and degree 3) to expand `X`, then fitting `LinearRegression` on it
+- Drawing a smooth prediction curve over a `linspace` of new X values
+- Building a **`Pipeline`** (`PolynomialFeatures` → `LinearRegression`) in a reusable `poly_regression(degree)` function
+- Trying degree 6 to see the model start to **overfit**
+
+**Results** (random data, no seed, so your numbers will vary)
+
+| Model | R² (test) |
+|---|---|
+| Straight line | 0.66 |
+| Degree 2 | 0.93 |
+| Degree 3 | 0.93 |
+
+**Key idea:** the model is still linear in its coefficients. Only the inputs are transformed (`x → x, x², x³ …`). Higher degrees give more flexibility but risk overfitting, which is what **regularization** (up next) tackles.
 
 ## 🛠️ Tech Stack
 
